@@ -13,10 +13,10 @@ except ImportError:
 class TumblrPhotoDownError(Exception):
 	''' General TumblrPohotoDown error ''' 
 	def __init__(self, msg):
-		self.msg = msg 
+		self.msg = msg
 
 	def __str__(self):
-		return self.msg 
+		return self.msg
 
 class TumblrPhotoDown:
 	def __init__(self, name, save='./', db='./'):
@@ -47,12 +47,12 @@ class TumblrPhotoDown:
 
 		return self._count;
 
-	def down(self):
+	def down_all(self):
 		print "do down"
 		posts = self.api.read()
 		for post in posts:
-			print "post type [%s]\n" % post['type']
-			self.pp.pprint(post)
+			if post['type'] == 'photo':
+				self.pp.pprint(post)
 
 
 if __name__ == "__main__":
@@ -61,5 +61,7 @@ if __name__ == "__main__":
 		quit()
 
 	tpd = TumblrPhotoDown(sys.argv[1])
-	print "total [%s]" % tpd.count()
-	#tpd.down()
+	print "target [%s] donwload start" % sys.argv[1]
+	print "\ttotal [%s]" % tpd.count()
+	tpd.down_all()
+
