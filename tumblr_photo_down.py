@@ -26,6 +26,7 @@ class TumblrPhotoDown:
 		self.api = Api(name + '.tumblr.com')
 		self.pp = pprint.PrettyPrinter(indent=4)
 		self._count = 0
+		self._coursor = 1
 		self.posts = None
 		self.conn = None
 		self._init_db();
@@ -62,6 +63,8 @@ class TumblrPhotoDown:
 		try:
 			c = self.conn.execute(u'select * from photos')
 		except:
+			print sys.exc_info()[1]
+			print "not found phots table. creating"
 			create_sql="""create table photos(
 			id INTEGER PRIMARY KEY,
 			tumblr_id INTEGER NOT NULL,
@@ -71,7 +74,12 @@ class TumblrPhotoDown:
 			self.conn.execute(create_sql)
 
 	def _is_exists_byId(self, tumblr_id):
-		return False;
+		c = self.conn.cursor()
+		c.execute('select id from photos where tumblr_id = ?', (tumblr_id,))
+		if c.fetchone() is None:
+			return False
+
+		return True
 
 	def _is_exists_byUrl(self, tumblr_photo_link_url):
 		if tumblr_photo_link_url is None:
@@ -79,31 +87,63 @@ class TumblrPhotoDown:
 
 		c = self.conn.cursor()
 		c.execute('select id from photos where tumblr_photo_link_url = ?', (tumblr_photo_link_url,))
-		if c.fetchone() is not None:
+		if c.fetchone() is None:
 			return False
 
-		return True;
+		return True
 
 	def _is_exists_byHash(self, tumblr_image_hash):
-		return False;
+		c = self.conn.cursor()
+		c.execute('select id from photos where tumblr_image_hash= ?', (tumblr_image_hash,))
+		if c.fetchone() is None:
+			return False
+
+		return True
 
 	def down_all(self):
 		posts = self.read();
 		for post in posts:
+			self._coursor += 1
 			if post['type'] == 'photo':
 				self._down(post);
 
 	def _down(self, post):
-		self.pp.pprint(post)
-		if      self._is_exists_byId(post['id']) != True and self._is_exists_byUrl(post.get('photo-link-url')) :
-			print post['photo-url-1280']
-			print os.path.basename(post['photo-url-1280'])
-			savepath = self.save + '/' + os.path.basename(post['photo-url-1280'])
-			if os.path.basename(post['photo-url-1280']).find('.') == -1:
-				_tmp = os.path.basename(post['photo-url-75'])
-				savepath += '.' + _tmp.split('.')[1]
-			urllib.urlretrieve(post['photo-url-1280'], savepath)
-			time.sleep(3)
+		print "downloading [%s/%s][%s]" % (self._coursor, self._count, post.get('photo-url-1280'))
+		if self._is_exists_byId(post['id']) == True:
+			print "\tduplicate by id [%s]" % post['id']
+			return False
+
+		if self._is_exists_byUrl(post.get('photo-link-url')) == True:
+			print "\tduplicate by photo-link-url [%s]" % post.get('photo-link-url')
+			return False
+
+		#print post['photo-url-1280']
+		#print os.path.basename(post['photo-url-1280'])
+		savepath = self.save + '/' + os.path.basename(post['photo-url-1280'])
+		if os.path.basename(post['photo-url-1280']).find('.') == -1:
+			_tmp = os.path.basename(post['photo-url-75'])
+			savepath += '.' + _tmp.split('.')[1]
+
+		if os.path.basename(post['photo-url-75']).split('.')[1] != 'jpg':
+			print "\tnot jpg file[%s]" % savepath
+			return False
+
+		urllib.urlretrieve(post['photo-url-1280'], savepath)
+
+		m = hashlib.md5()
+		for f in open(savepath, 'rb'):
+			m.update(f)
+		hash = m.hexdigest()
+
+		if self._is_exists_byHash(hash) == True:
+			print "\tduplicate by hash [%s]" % hash
+			os.remove(savepath)
+			return False
+
+		self.conn.execute('insert into photos(tumblr_id, tumblr_photo_link_url, tumblr_image_hash) values (?, ?, ?)',
+				(post['id'], post.get('photo-link-url'), hash))
+
+		time.sleep(1)
 
 
 if __name__ == "__main__":
