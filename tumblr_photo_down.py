@@ -112,7 +112,11 @@ class TumblrPhotoDown:
 			print "\tnot jpg file[%s]" % savepath
 			return False
 
-		urllib.urlretrieve(post['photo-url-1280'], savepath)
+		try:
+			urllib.urlretrieve(post['photo-url-1280'], savepath)
+		except:
+			print '\tdownload expected error: %s' % (sys.exc_info()[1])
+
 
 		m = hashlib.md5()
 		for f in open(savepath, 'rb'):
