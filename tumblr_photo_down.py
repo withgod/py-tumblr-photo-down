@@ -68,7 +68,6 @@ class TumblrPhotoDown:
 			create_sql="""create table photos(
 			id INTEGER PRIMARY KEY,
 			tumblr_id INTEGER NOT NULL,
-			tumblr_photo_link_url TEXT,
 			tumblr_image_hash TEXT NOT NULL
 			)"""
 			self.conn.execute(create_sql)
