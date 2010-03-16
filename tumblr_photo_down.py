@@ -81,17 +81,6 @@ class TumblrPhotoDown:
 
 		return True
 
-	def _is_exists_byUrl(self, tumblr_photo_link_url):
-		if tumblr_photo_link_url is None:
-			return False
-
-		c = self.conn.cursor()
-		c.execute('select id from photos where tumblr_photo_link_url = ?', (tumblr_photo_link_url,))
-		if c.fetchone() is None:
-			return False
-
-		return True
-
 	def _is_exists_byHash(self, tumblr_image_hash):
 		c = self.conn.cursor()
 		c.execute('select id from photos where tumblr_image_hash= ?', (tumblr_image_hash,))
@@ -111,10 +100,6 @@ class TumblrPhotoDown:
 		print "downloading [%s/%s][%s]" % (self._coursor, self._count, post.get('photo-url-1280'))
 		if self._is_exists_byId(post['id']) == True:
 			print "\tduplicate by id [%s]" % post['id']
-			return False
-
-		if self._is_exists_byUrl(post.get('photo-link-url')) == True:
-			print "\tduplicate by photo-link-url [%s]" % post.get('photo-link-url')
 			return False
 
 		#print post['photo-url-1280']
