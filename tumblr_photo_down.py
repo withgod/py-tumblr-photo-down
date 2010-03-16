@@ -124,8 +124,8 @@ class TumblrPhotoDown:
 			os.remove(savepath)
 			return False
 
-		self.conn.execute('insert into photos(tumblr_id, tumblr_photo_link_url, tumblr_image_hash) values (?, ?, ?)',
-				(post['id'], post.get('photo-link-url'), hash))
+		self.conn.execute('insert into photos(tumblr_id,  tumblr_image_hash) values (?,  ?)',
+				(post['id'],  hash))
 
 		time.sleep(1)
 
