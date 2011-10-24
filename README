@@ -1,0 +1,13 @@
+About:
+	tumblr photo downloader.
+
+Requirements
+	python-tumblr http://code.google.com/p/python-tumblr/
+	Python > 2.5
+
+Usage:
+	$./tumblr_photo_down.py withgod
+
+License:
+	WTFPL
+
