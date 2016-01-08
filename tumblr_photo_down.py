@@ -11,7 +11,7 @@ except ImportError:
     from django.utils import simplejson
 
 class TumblrPhotoDownError(Exception):
-	''' General TumblrPohotoDown error ''' 
+	''' General TumblrPhotoDown error ''' 
 	def __init__(self, msg):
 		self.msg = msg
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 		quit()
 
 	tpd = TumblrPhotoDown(sys.argv[1])
-	print "target [%s] donwload start" % sys.argv[1]
+	print "target [%s] download start" % sys.argv[1]
 	print "\ttotal [%s]" % tpd.count()
 	tpd.down_all()
 
